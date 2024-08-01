@@ -177,3 +177,7 @@ You can check if the master node is running by running `kubectl get nodes`
 
 ### 7) Setup Flannel as CNI
 We will be using Flannel as our CNI (Control Network Interface) with Kubernetes.
+
+```
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+```
