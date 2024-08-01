@@ -146,4 +146,23 @@ Although etcd ports are included in control plane section, you can also host you
 sudo firewall-cmd --add-port=6443/tcp --permanent
 ```
 
-### 6) 
+### 6) Initialize Master Node
+#### Create config file for kubeadm
+> kubeadm-master.yaml
+```
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: InitConfiguration
+localApiEndpoint:
+  advertiseAddresss: <IP Address for the cluster members to reach>
+nodeRegistration:
+  criSocket: unix///var/run/cri-dockerd.sock
+  imagePullPolicy: IfNotPresent
+  taints: []
+---
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+controlPlaneEndpoint: <IP Address that all control planes shared with>
+```
+
+### 7) Setup Flannel as CNI
+We will be using Flannel as our CNI (Control Network Interface) with Kubernetes.
