@@ -185,3 +185,36 @@ kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Doc
 If you have configured the POD network CIDR, you'll need to configue kube-flannel.yml as well.
 
 Currently the default network in flannel is `10.244.0.0/16`
+
+### 8) Join worker nodes
+Generate bootstrap token from the master node.
+```
+sudo kubeadm create token --print-join-command
+```
+
+Create the following kubeadm config
+> kubeadm-worker.yaml
+```
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+nodeRegistration:
+  criSocket: unix:///var/run/cri-dockerd.sock
+  imagePullPolicy: IfNotPresent
+  taints: []
+discovery:
+  bootstrapToken:
+    token: <Bootstrap token generated from master node>
+    apiServerEndpoint: <Your master node ip and port>
+    caCertHashes: ['<Cert hash generated with bootstrap token>']
+```
+
+Run the following command.
+```
+sudo kubeadm join --config kubeadm-worker.yaml
+```
+
+You can verify the node was created by running `kubectl get node` on your master node.
+
+You may have to patch the podCidr in the worker node, if the `--allocate-node-cidrs=true` properties was not set in the master controller node.
+
+The config can be found in `/etc/kubernetes/manifests/`
