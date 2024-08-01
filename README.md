@@ -220,7 +220,7 @@ You may have to patch the podCidr in the worker node, if the `--allocate-node-ci
 
 The config can be found in `/etc/kubernetes/manifests/`
 
-To patch the node run the following command
+To patch the node run the following command on the master node.
 ```
 kubectl patch node <Node name> -p '{"spec":{"podCIDR":"<Pod network cidr>"}}'
 ```
