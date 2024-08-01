@@ -164,5 +164,16 @@ kind: ClusterConfiguration
 controlPlaneEndpoint: <IP Address that all control planes shared with>
 ```
 
+run `kubeadm init --config kubeadm-master.yaml`
+
+Next run the following commands to configure kubectl to run on current user.
+```
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+You can check if the master node is running by running `kubectl get nodes`
+
 ### 7) Setup Flannel as CNI
 We will be using Flannel as our CNI (Control Network Interface) with Kubernetes.
