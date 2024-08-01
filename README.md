@@ -27,15 +27,14 @@ kubeadm: Using kubeadm, you can create a minimum viable Kubernetes cluster that 
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install docker-ce docker-ce-cli
 ```
-Docker will be use as the CRI (Container Runtime Interface) for kubernetes.
+We will be using Docker(docker uses containerd underlying) as our container runtime.
 
-### 4) Configure Docker for Kubernetes
+### 4) Configure CRI for Kubernetes
 * #### Change Docker CGroup Driver to systemd
 cgroup (Control Group) is a Linux kernel feature that allows system administrators to allocate and manage resources such as CPU, memory, I/O, and network bandwidth among a group of processes.
 ```
 cd /etc/docker
 touch daemon.json
-sudo cat <<EOF | sudo tee /etc/docker/daemon.json
 ```
 
 > daemon.json
@@ -48,12 +47,103 @@ sudo cat <<EOF | sudo tee /etc/docker/daemon.json
 }
 ```
 
-cgroupfs provides a low-level, file system-based interface for manual cgroup management.
-systemd offers a high-level, command-line-based interface for simplified cgroup management and integration with system services.
+- cgroupfs provides a low-level, file system-based interface for manual cgroup management.
+- systemd offers a high-level, command-line-based interface for simplified cgroup management and integration with system services.
 
-* #### Disable swap
+* #### Install cri-dockerd
+cri-dockerd is a container runtime interface (CRI) implementation for Docker. It allows you to use Docker as the container runtime for Kubernetes.
+
+Download cri-dockerd bin and install it
+```
+wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.15/cri-dockerd-0.3.15.amd64.tgz
+tar -xvzf cri-dockerd-0.3.15.amd64.tgz
+cd cri-dockerd
+sudo install -o root -g root -m 0755 cri-dockerd /usr/local/bin/cri-dockerd
+```
+
+Setup service and socket for cri-dockerd
+```
+wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.service
+wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.socket
+sudo cp cri-docker.service /etc/systemd/system
+sudo cp cri-docker.socket   /etc/systemd/system
+sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+systemctl daemon-reload
+systemctl enable cri-docker.service
+systemctl enable --now cri-docker.socket
+systemctl start cri-docker.service
+```
+
+Remove containerd configurations
+```
+sudo rm /etc/containerd/config.toml
+systemctl restart containerd
+```
+
+Setup kubelet to use cri-docker
+```
+cd /var/lib/kubelet/
+sudo touch kubeadm-flags.env
+```
+> kubeadm-flags.env
+```
+--container-runtime-endpoint=unix:///var/run/cri-dockerd.sock
+```
+
+### 3) Disable swap
 swap is a reserved space on a hard drive that is used as an extension of the computer's physical RAM (Random Access Memory). When the system runs low on physical RAM, it uses the swap space to temporarily store data that doesn't fit in RAM.
 ```
 sudo swapoff -a
 ```
 > The above command only temporaily disable swap
+
+To permanently disable swap, you'll have to comment out a line in the file below
+```
+sudo vi /etc/fstab
+```
+Comment out `/dev/mapper/cs-swap` by adding a `#` infront of the line.
+
+### 4) Enable IP Forwarding and iptables for processing
+```
+cd /etc/sysctl.d
+sudo touch kubernetes.conf
+sudo vi kubernetes.conf
+```
+
+> kubernetes.conf
+```
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+```
+These parameters determine whether packets crossing a bridge are sent to iptables for processing.
+
+iptables is a firewall utility in Linux that allows you to manage incoming and outgoing network traffic based on predetermined security rules. 
+```
+net.ipv4.ip_forward = 1
+```
+This allows linux to forward the request to the correct NIC (Network Interface Card) in the event where the request comes in for the wrong NIC.
+
+### 5) Open ports for kubernetes
+#### Control plane
+| Protocol | Direction | Port Range |	Purpose	| Used By |
+| -------- | --------- | ---------- | ------- | ------- |
+| TCP |	Inbound |	6443 | Kubernetes API server | All |
+| TCP	| Inbound	| 2379-2380	| etcd server client API | kube-apiserver, etcd |
+| TCP	| Inbound	| 10250	| Kubelet API	| Self, Control plane |
+| TCP	| Inbound	| 10259	| kube-scheduler	| Self |
+| TCP	| Inbound	| 10257	| kube-controller-manager	| Self |
+
+Although etcd ports are included in control plane section, you can also host your own etcd cluster externally or on custom ports.
+
+#### Worker node(s)
+| Protocol | Direction | Port Range	| Purpose	| Used By |
+| -------- | --------- | ---------- | ------- | ------- |
+| TCP	| Inbound	| 10250	| Kubelet API	| Self, Control plane |
+| TCP	| Inbound	| 10256	| kube-proxy	| Self, Load balancers |
+| TCP	| Inbound	| 30000-32767	| NodePort Services	| All |
+
+```
+sudo firewall-cmd --add-port=6443/tcp --permanent
+```
+
+### 6) 
