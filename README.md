@@ -215,6 +215,12 @@ sudo kubeadm join --config kubeadm-worker.yaml
 
 You can verify the node was created by running `kubectl get node` on your master node.
 
+#### Patch worker node
 You may have to patch the podCidr in the worker node, if the `--allocate-node-cidrs=true` properties was not set in the master controller node.
 
 The config can be found in `/etc/kubernetes/manifests/`
+
+To patch the node run the following command
+```
+kubectl patch node <Node name> -p '{"spec":{"podCIDR":"<Pod network cidr>"}}'
+```
