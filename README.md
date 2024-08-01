@@ -181,3 +181,7 @@ We will be using Flannel as our CNI (Control Network Interface) with Kubernetes.
 ```
 kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 ```
+
+If you have configured the POD network CIDR, you'll need to configue kube-flannel.yml as well.
+
+Currently the default network in flannel is `10.244.0.0/16`
