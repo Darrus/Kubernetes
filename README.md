@@ -80,16 +80,6 @@ sudo rm /etc/containerd/config.toml
 systemctl restart containerd
 ```
 
-Setup kubelet to use cri-docker
-```
-cd /var/lib/kubelet/
-sudo touch kubeadm-flags.env
-```
-> kubeadm-flags.env
-```
---container-runtime-endpoint=unix:///var/run/cri-dockerd.sock
-```
-
 ### 3) Disable swap
 swap is a reserved space on a hard drive that is used as an extension of the computer's physical RAM (Random Access Memory). When the system runs low on physical RAM, it uses the swap space to temporarily store data that doesn't fit in RAM.
 ```
@@ -162,6 +152,11 @@ nodeRegistration:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 controlPlaneEndpoint: <IP Address that all control planes shared with>
+---
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+containerRuntimeEndpoint: unix:///var/run/cri-dockerd.sock
 ```
 
 run `kubeadm init --config kubeadm-master.yaml`
