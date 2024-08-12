@@ -89,6 +89,11 @@ wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/sys
 sudo cp cri-docker.service /etc/systemd/system
 sudo cp cri-docker.socket   /etc/systemd/system
 sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
+```
+
+Enable the service and start it
+```
+setenforce 0
 systemctl daemon-reload
 systemctl enable cri-docker.service
 systemctl enable --now cri-docker.socket
