@@ -145,7 +145,7 @@ kind: InitConfiguration
 localApiEndpoint:
   advertiseAddresss: <IP Address for the cluster members to reach>
 nodeRegistration:
-  criSocket: unix///var/run/cri-dockerd.sock
+  criSocket: unix:///var/run/cri-dockerd.sock
   imagePullPolicy: IfNotPresent
   taints: []
 ---
