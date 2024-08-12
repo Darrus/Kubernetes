@@ -14,6 +14,23 @@ EPEL Next is an additional repository that allows package maintainers to alterna
 
 ### 2) Install kubernetes components
 ```
+cd /etc/yum.repos.d
+touch kubernetes.repo
+```
+> kubernetes.repo
+```
+[kubernetes] 
+name=Kubernetes 
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64 
+enabled=1 
+gpgcheck=1 
+repo_gpgcheck=1 
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg 
+exclude=kube*
+```
+Setup repo to grab the kubernetes packages
+
+```
 sudo dnf install kubectl kubeadm kubelet
 ```
 kubelet: The kubelet is the primary “node agent” that runs on each node. It can register the node with the apiserver using one of: the hostname; a flag to override the hostname; or specific logic for a cloud provider.
