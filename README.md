@@ -69,6 +69,11 @@ touch daemon.json
 * #### Install cri-dockerd
 cri-dockerd is a container runtime interface (CRI) implementation for Docker. It allows you to use Docker as the container runtime for Kubernetes.
 
+Install wget
+```
+sudo dnf install wget
+```
+
 Download cri-dockerd bin and install it
 ```
 wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.15/cri-dockerd-0.3.15.amd64.tgz
