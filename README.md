@@ -173,6 +173,7 @@ Although etcd ports are included in control plane section, you can also host you
 
 ```
 sudo firewall-cmd --add-port=6443/tcp --permanent
+sudo firewall-cmd --reload
 ```
 
 ### 6) Initialize Master Node
