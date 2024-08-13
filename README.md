@@ -66,7 +66,21 @@ touch daemon.json
 - cgroupfs provides a low-level, file system-based interface for manual cgroup management.
 - systemd offers a high-level, command-line-based interface for simplified cgroup management and integration with system services.
 
-* #### Install cri-dockerd
+* #### Disable SELINUX
+Security-Enhanced Linux (SELinux) is a security architecture for Linux® systems that allows administrators to have more control over who can access the system.
+```
+setenforce 0
+```
+> The above command only temporarily disables SELINUX
+To disable SELINUX permanently
+```
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+```
+
+> [!CAUTION]
+> It is not recommended to disable SELINUX as it's a security vulnerability, will have to take a look at how to allow cri-dockerd to work with SELINUX=enforcing
+
+* #### Download and Install cri-dockerd
 cri-dockerd is a container runtime interface (CRI) implementation for Docker. It allows you to use Docker as the container runtime for Kubernetes.
 
 Install wget
@@ -90,16 +104,6 @@ sudo cp cri-docker.service /etc/systemd/system
 sudo cp cri-docker.socket   /etc/systemd/system
 sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
 ```
-
-Disable SELINUX temporarily
-```
-setenforce 0
-```
-Disable SELINUX permanently
-```
-sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
-```
-Security-Enhanced Linux (SELinux) is a security architecture for Linux® systems that allows administrators to have more control over who can access the system.
 
 Enable the service and start it
 ```
