@@ -91,9 +91,18 @@ sudo cp cri-docker.socket   /etc/systemd/system
 sed -i -e 's,/usr/bin/cri-dockerd,/usr/local/bin/cri-dockerd,' /etc/systemd/system/cri-docker.service
 ```
 
-Enable the service and start it
+Disable SELINUX temporarily
 ```
 setenforce 0
+```
+Disable SELINUX permanently
+```
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+```
+Security-Enhanced Linux (SELinux) is a security architecture for Linux® systems that allows administrators to have more control over who can access the system.
+
+Enable the service and start it
+```
 systemctl daemon-reload
 systemctl enable cri-docker.service
 systemctl enable --now cri-docker.socket
