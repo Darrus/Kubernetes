@@ -1,4 +1,7 @@
 # Kubernetes
+## Table of Contents
+- [How to setup Kubernetes in VirtualBox running CentOS](#how-to-setup-kubernetes-in-virtualbox-running-centos)
+- [Simple setup for Local Docker Image registry](#simple-setup-for-local-docker-image-registry)
 
 ## How to setup Kubernetes in VirtualBox running CentOS
 ### 1) Setup epel repository
@@ -259,3 +262,17 @@ To patch the node run the following command on the master node.
 ```
 kubectl patch node <Node name> -p '{"spec":{"podCIDR":"<Pod network cidr>"}}'
 ```
+
+## Simple setup for Local Docker Image registry
+### 1) Run container with docker's registry image
+```
+docker run -d -p 5000:5000 --restart=always --name registry registry:latest
+```
+
+### 2) Edit daemon.json
+Add the following line so that you do not require https connection to pull the image from the registry
+> daemon.json
+```
+"insecure-registries":["<Your host IP>:5000"]
+```
+The file can be found at `/etc/docker/daemon.json` for linux and `C:\ProgramData\Docker\config\daemon.json` for windows.
