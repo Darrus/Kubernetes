@@ -1,7 +1,56 @@
 # Kubernetes
 ## Table of Contents
+- [How to install Guest Additions in CentOS](#how-to-install-guest-additions-in-centos)
 - [How to setup Kubernetes in VirtualBox running CentOS](#how-to-setup-kubernetes-in-virtualbox-running-centos)
 - [Simple setup for Local Docker Image registry](#simple-setup-for-local-docker-image-registry)
+
+## How to install Guest Additions in CentOS
+### 1) Update the system
+```sudo dnf update```
+
+### 2) Install kernel-devel
+```
+uname -r
+```
+> Check your OS version
+
+```
+sudo dnf install kernel-devel
+```
+
+### 3) Reboot
+```
+sudo reboot
+```
+
+### 4) Insert Guest Addition Image 
+![image](https://github.com/user-attachments/assets/1b838110-12c3-4160-95d0-96f28706b49a)
+
+In your VM, click Device > Insert Guest Additions CD Image...
+
+### 5) Mount the optical drive
+```
+sudo mount /dev/cdrom /mnt
+```
+
+### 6) Install
+```
+cd /mnt
+sudo ./VBoxGuestLinuxAdditions.run
+```
+
+### 7) Reboot
+```
+sudo reboot
+```
+
+### 8) Verify
+```
+lsmod | grep vboxguest
+```
+
+If there is result from above, you have succesfully installed Guest Additions for CentOS
+
 
 ## How to setup Kubernetes in VirtualBox running CentOS
 ### 1) Setup epel repository
