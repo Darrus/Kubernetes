@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mithriljs-deployment
+spec:
+  selector:
+    matchLabels:
+      app: mithriljs
+      env: production
+  replicas: 3
+  template:
+    metadata:
+      name: mithriljs
+      labels:
+        app: mithriljs
+        env: production
+    spec:
+      containers:
+        - name: mithriljs
+          image: 10.0.0.23:5000/mithril.js
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+      nodeSelector:
+        kubernetes.io/hostname: worker
